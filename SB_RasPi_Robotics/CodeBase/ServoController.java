@@ -3,15 +3,26 @@ package SB_RasPi_Robotics.CodeBase;//SB_RasPi_Robotics.CodeBase.ServoController
 public class ServoController
 {
     
-    private final int minValue = 90;
-    private final int maxValue = 140;
-    private final int offset = 115;
+    private int minValue;
+    private int maxValue;
+    private int offset;
 
-    public ServoController(int value) {
+    public ServoController(int pinNumber, int startingPosition, int minValueInput, int maxValueInput, int offsetInput) {
         
-        
+
+        minValue= minValueInput;
+        maxValue = maxValueInput;
+        offset = offsetInput;
+
         // Setup Servoblaster
-        
+
+
+/*
+        StringBuilder sb = new StringBuilder();
+        sb.append("");
+        sb.append(pinNumber);
+        String argument = sb.toString();
+*/
         try
         {
             String[] cmd = new String[]{"/bin/sh", "SB_RasPi_Robotics/CodeBase/SBServoSetup.sh"};
@@ -21,10 +32,10 @@ public class ServoController
             e.printStackTrace();
         }
 
-        
-        
-        
-        setPosition(value);
+
+
+
+        setPosition(startingPosition);
         
         
         

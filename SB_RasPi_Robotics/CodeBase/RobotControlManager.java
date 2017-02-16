@@ -3,24 +3,25 @@ package SB_RasPi_Robotics.CodeBase;
 public class RobotControlManager
 {
     
-    private static int forwardMovement; // a value between -100 and 100 representing a percentage
-    private static int steeringValue; // a value between -100 and 100 representing a percentage
-    private static int leftSteerLimit;
-    private static int rightSteerLimit;
-    private static LEDControl headlights;
-    private static MotorControl motor;
-    private static UltraSoundDistanceMonitor distanceMonitor;
-    private static ServoController servo;
+    private  int forwardMovement; // a value between -100 and 100 representing a percentage
+    private  int steeringValue; // a value between -100 and 100 representing a percentage
+    private  int mastPanValue;
+    private  int leftSteerLimit;
+    private  int rightSteerLimit;
+    private  LEDControl headlights;
+    private  MotorControl motor;
+    private  UltraSoundDistanceMonitor distanceMonitor;
+    private  ServoController steeringServo;
+    private  PWMServoController mastPanServo;
 
 
     public RobotControlManager() {
         
         headlights = new LEDControl();
         motor = new MotorControl();
-        servo = new ServoController(0);
-        
-     //   distanceMonitor = new SB_RasPi_Robotics.CodeBase.UltraSoundDistanceMonitor();
-        
+        steeringServo = new ServoController(22,0,90,140,115);
+        mastPanServo = new PWMServoController(3,0,0,180,0);
+
         
         
         
@@ -31,7 +32,7 @@ public class RobotControlManager
 
 
 
-    public static void setMotorSpeed(int input) {
+    public void setMotorSpeed(int input) {
         
         if (input >= 100) {
             forwardMovement = 100;
@@ -46,12 +47,12 @@ public class RobotControlManager
         
     }    
     
-    public static void increaseMotorSpeed(int input) {
+    public void increaseMotorSpeed(int input) {
         
             setMotorSpeed(forwardMovement + input);
     }
     
-    public static void setSteering(int input) {
+    public  void setSteering(int input) {
         
             if (input >= 100) {
             steeringValue = 100;
@@ -61,40 +62,55 @@ public class RobotControlManager
                     steeringValue = input;
         }
     
-        servo.setPosition(steeringValue);
+        steeringServo.setPosition(steeringValue);
     
+    }
+
+
+    public  void setMastPan(int input) {
+
+        if (input >= 100) {
+            mastPanValue = 100;
+        } else if (input <= 0) {
+            mastPanValue = 0;
+        } else {
+            mastPanValue = input;
+        }
+
+        mastPanServo.setPosition(mastPanValue);
+
     }
     
 
     
-    public static void steerLeftOrRight(int input) {
+    public void steerLeftOrRight(int input) {
         
           setSteering(steeringValue + input);
     }
     
-    public static int getMotorSpeed() {
+    public int getMotorSpeed() {
     
         return forwardMovement;
     }
     
-    public static int getSteerValue() {
+    public int getSteerValue() {
         return steeringValue;
         }
     
     
-    public static void setHeadlightBrightness(int input) {
-        
+    public void setHeadlightBrightness(int input) {
+
         headlights.setBrightness(input);
         
     }
            
            
-      public static void increaseHeadlights() {
+      public void increaseHeadlights() {
         
         headlights.increaseBrightness(10);
         }     
         
-    public static void decreaseHeadlights() {
+    public void decreaseHeadlights() {
         
         headlights.increaseBrightness(-10);
         }

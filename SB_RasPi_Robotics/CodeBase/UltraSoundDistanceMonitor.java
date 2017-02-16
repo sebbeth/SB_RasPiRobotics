@@ -81,6 +81,35 @@ public class UltraSoundDistanceMonitor {
         }
         return output;
     }
+
+    public float getAveragedDistance(int iterations) {
+
+
+        /*
+        A function that takes a number of readings then averages them and returns that value
+         */
+
+        if (iterations > 0) {
+
+            float numerator = 0;
+
+            for (int i = 0; i < iterations; i++ ) { // First get all the values
+
+                numerator = numerator + getDistance();
+
+            }
+
+            // Now divide numerator by iterations
+
+            return numerator / iterations;
+
+        } else {
+
+            return 0;
+        }
+
+
+    }
     
     /**
      * Put a high on the trig pin for TRIG_DURATION_IN_MICROS

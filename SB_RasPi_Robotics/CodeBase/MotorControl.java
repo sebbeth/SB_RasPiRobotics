@@ -8,8 +8,8 @@ public class MotorControl
     
     public int max = 60;
     
-        private int speed;
-        private int softPWMPin_ONE_number = 4;
+    private int speed;
+    private int softPWMPin_ONE_number = 4;
     private int softPWMPin_TWO_number = 5;
 
     
