@@ -15,7 +15,7 @@ public class PathFinder
 	
     public static void main(String[] args) {
         
-        System.out.println("Hello :) \n \n Press front bumper to start");
+        System.out.println("********* PATHFINDER *********");
         
         
         robotControl = new RobotControlManager();
@@ -28,6 +28,61 @@ public class PathFinder
 
 
         
+    }
+
+
+    private static void panMastServo() {
+
+
+        // Pan the mast and the steering servo
+
+        boolean panning = true;
+        int position = 0;
+
+        while (panning) {
+
+
+            robotControl.setMastPan(position);
+
+            hang(20);
+
+
+            position++;
+
+            if (position == 100) {
+
+                panning = false;
+
+            }
+
+
+        }
+
+        panning = true;
+
+        while (panning) {
+
+
+            robotControl.setMastPan(position);
+
+            hang(20);
+
+
+            position--;
+
+            if (position == 50) {
+
+                panning = false;
+
+            }
+
+
+        }
+
+
+
+
+
     }
     
     
@@ -42,11 +97,10 @@ public class PathFinder
             
             robotControl.increaseHeadlights();
             robotControl.increaseHeadlights();
-            robotControl.setMastPan(20);
 
             Thread.sleep(300);
 
-            robotControl.setMastPan(50);
+            panMastServo();
 
             robotControl.decreaseHeadlights();
             robotControl.decreaseHeadlights();
@@ -66,8 +120,7 @@ public class PathFinder
             */
 
 
-            shakeHead();
-            reverseTurn();
+            scanSuroundingsBeforeMoving();
 
             
         } catch (Exception e) {
@@ -93,6 +146,7 @@ public class PathFinder
     
     }
 
+
     private static void hang(int time) {
 
         try {
@@ -103,8 +157,94 @@ public class PathFinder
 
     }
 
+
+    private static int averageOf(int[] input) {
+
+        int sum = 0;
+
+        for (int i = 0; i < input.length; i++ ) {
+
+            // Sum the inputs
+            sum = sum + input[i];
+
+        }
+
+        // Now average the result
+
+
+        return sum / input.length;
+    }
+
     /****  Skills    **/
 
+
+
+
+    private static void scanSuroundingsBeforeMoving() {
+
+
+        /*
+            This function takes values from scan() and evaluates the best direction to move in.
+
+            logic
+
+            if centre measurement == 0
+                three point turn
+
+
+
+            if   averageOf([1] + [2] + [3] >= 100
+                Go forward
+
+            else if averageOf([0] + [1]) > averageOf([2] + [3] + [4])
+                turnToRight
+
+
+            else if averageOf([0] + [1] + [2]) < averageOf( [3] + [4])
+                turnToLeft
+         */
+
+        int measurements[] = scan();
+
+        if (measurements[2] <= 50) {
+
+            //three point turn
+            hang(1000);
+            threePointTurn();
+
+        } else if (averageOf(new int[]{measurements[1],measurements[2],measurements[3]}) >= 70) {
+
+            // Go forward
+            hang(1000);
+            driveWhileMeasuring();
+
+        } else if (averageOf(new int[]{measurements[0],measurements[1]}) >
+                averageOf(new int[]{measurements[3],measurements[4]})) {
+
+
+            hang(1000);
+            turnToRight();
+
+
+        } else if (averageOf(new int[]{measurements[3],measurements[4]}) >
+                averageOf(new int[]{measurements[0],measurements[1]})) {
+
+            hang(1000);
+            turnToLeft();
+
+
+        }
+
+
+            hang(1000);
+
+       // threePointTurn();
+
+        //turnToLeft();
+
+        turnToRight();
+
+    }
 
     private static int[] scan() {
 
@@ -119,7 +259,7 @@ public class PathFinder
 
             hang(200);
 
-            measurements[i] = Math.round(distanceMonitor.getAveragedDistance(iterations));
+            measurements[i] = Math.round(distanceMonitor.getDistance());
 
             hang(200);
 
@@ -148,19 +288,104 @@ public class PathFinder
 
     private static void turnToLeft() {
 
+        robotControl.setSteering(100);
+        hang(100);
+        robotControl.setMotorSpeed(20);
+
+        hang(200);
+        robotControl.setMotorSpeed(30);
+        hang(500);
+        robotControl.setMotorSpeed(0);
+        robotControl.setSteering(0);
+
+
+
+
+        hang(1000);
+
+        driveWhileMeasuring();
 
     }
 
     private static void turnToRight() {
 
+        robotControl.setSteering(-100);
+        hang(100);
+        robotControl.setMotorSpeed(20);
+
+        hang(200);
+        robotControl.setMotorSpeed(30);
+        hang(500);
+        robotControl.setMotorSpeed(0);
+        robotControl.setSteering(0);
+
+
+
+
+        hang(1000);
+
+        driveWhileMeasuring();
 
     }
 
     private static void driveWhileMeasuring() {
 
+        System.out.println("Driving forward while measuring ");
+
+        boolean running = true;
+
+        robotControl.setMotorSpeed(20);
+        robotControl.setSteering(0);
+
+
+        while (running) {
+
+            int forwardDistance = Math.round(distanceMonitor.getDistance());
+
+            if (forwardDistance < 50 ) {
+
+                // Stop
+                System.out.println("Obstacle in path");
+                running = false;
+
+                stop();
+            }
+
+            hang(100);
+        }
+
+        scanSuroundingsBeforeMoving();
 
     }
 
+
+    private static void threePointTurn() {
+
+        System.out.println("Three point Turn");
+
+        robotControl.setMotorSpeed(0);
+        hang(50);
+        robotControl.setMotorSpeed(-20);
+        robotControl.setSteering(-100);
+        hang(1000);
+        robotControl.setMotorSpeed(0);
+        robotControl.setSteering(100);
+        hang(800);
+        robotControl.setSteering(100);
+        robotControl.setMotorSpeed(20);
+        hang(1000);
+        robotControl.setSteering(0);
+        robotControl.setMotorSpeed(0);
+
+
+
+        hang(1000);
+
+        scanSuroundingsBeforeMoving();
+
+
+
+    }
 
 
     private static void reverseTurn() {
@@ -188,7 +413,9 @@ public class PathFinder
         
         robotControl.decreaseHeadlights();
 
-        
+
+
+
         
     }
 
@@ -210,8 +437,7 @@ public class PathFinder
         robotControl.setMastPan(80);
         hang(100);
 
-        robotControl.setMastPan(20);
-        hang(100);
+
         robotControl.setMastPan(50);
 
 
