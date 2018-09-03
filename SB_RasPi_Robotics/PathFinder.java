@@ -1,7 +1,9 @@
 package SB_RasPi_Robotics;
 
+import SB_RasPi_Robotics.CodeBase.ObservableButton;
 import SB_RasPi_Robotics.CodeBase.RobotControlManager;
 import SB_RasPi_Robotics.CodeBase.UltraSoundDistanceMonitor;
+
 
 public class PathFinder
 {
@@ -16,21 +18,40 @@ public class PathFinder
 
 
     public static void main(String[] args) {
-        
+
+        new PathFinder();
+    }
+
+    public PathFinder() {
+
         System.out.println("********* PATHFINDER *********");
-        
-        
+
         robotControl = new RobotControlManager();
         distanceMonitor = new UltraSoundDistanceMonitor();
-        
-        new RunnablePushButtonMonitor().start();
-    
-        
-        activate();
+
+        flash();
+
+        System.out.println("Press bumper to start...");
 
 
-        
+
+        new RunnablePushButtonMonitor(this).start();
+        active = false;
+        waiting();
+
     }
+
+    private static void waiting() {
+        System.out.println("Waiting...");
+        while(true) {
+            if (active) {
+                activate();
+                return;
+            }
+        }
+    }
+
+
 
 
     private static void panMastServo() {
@@ -68,19 +89,7 @@ public class PathFinder
     public static void activate() {
         
         try {
-            
-            active = true;
-            robotControl.increaseHeadlights();
-            robotControl.increaseHeadlights();
-            robotControl.setSteering(100);
-
-            Thread.sleep(300);
-
-         //   panMastServo();
-            robotControl.decreaseHeadlights();
-            robotControl.decreaseHeadlights();
-            robotControl.setSteering(0);
-
+            shakeHead();
             scanSuroundingsBeforeMoving();
             
         } catch (Exception e) {    }
@@ -89,7 +98,16 @@ public class PathFinder
     
 
     public static void pushButtonPressed() {
-        System.out.println("Button!!");
+        System.out.println("Button :O" + active);
+
+        if (active) {
+          //  activate();
+            active = false;
+        } else {
+            active = true;
+        }
+        flash();
+
     }
 
 
@@ -117,66 +135,60 @@ public class PathFinder
 
     private static void scanSuroundingsBeforeMoving() {
 
+        if (!active) {
+            waiting();
+            return;
+        }
 
-        /*
-            This function takes values from scan() and evaluates the best direction to move in.
+            int measurements[] = scan();
 
-            logic
+            if (measurements[2] <= 50) {
 
-            if centre measurement == 0
-                three point turn
+                //three point turn
+                hang(1000);
+                threePointTurn();
 
-            if   averageOf([1] + [2] + [3] >= 100
-                Go forward
+            } else if (averageOf(new int[]{measurements[1], measurements[2], measurements[3]}) >= 70) {
 
-            else if averageOf([0] + [1]) > averageOf([2] + [3] + [4])
-                turnToRight
+                // Go forward
+                hang(1000);
+                driveWhileMeasuring();
+
+            } else if (averageOf(new int[]{measurements[0], measurements[1]}) >
+                    averageOf(new int[]{measurements[3], measurements[4]})) {
 
 
-            else if averageOf([0] + [1] + [2]) < averageOf( [3] + [4])
-                turnToLeft
-         */
+                hang(1000);
+                turnToRight();
 
-        int measurements[] = scan();
 
-        if (measurements[2] <= 50) {
+            } else if (averageOf(new int[]{measurements[3], measurements[4]}) >
+                    averageOf(new int[]{measurements[0], measurements[1]})) {
 
-            //three point turn
-            hang(1000);
-            threePointTurn();
+                hang(1000);
+                turnToLeft();
 
-        } else if (averageOf(new int[]{measurements[1],measurements[2],measurements[3]}) >= 70) {
 
-            // Go forward
-            hang(1000);
-            driveWhileMeasuring();
-
-        } else if (averageOf(new int[]{measurements[0],measurements[1]}) >
-                averageOf(new int[]{measurements[3],measurements[4]})) {
-
+            }
 
             hang(1000);
             turnToRight();
 
+    }
 
-        } else if (averageOf(new int[]{measurements[3],measurements[4]}) >
-                averageOf(new int[]{measurements[0],measurements[1]})) {
+    private static void flash() {
+        try {
+            robotControl.increaseHeadlights();
+            robotControl.increaseHeadlights();
+            robotControl.increaseHeadlights();
 
-            hang(1000);
-            turnToLeft();
+            Thread.sleep(1000);
 
+            robotControl.decreaseHeadlights();
+            robotControl.decreaseHeadlights();
+            robotControl.decreaseHeadlights();
 
-        }
-
-
-            hang(1000);
-
-       // threePointTurn();
-
-        //turnToLeft();
-
-        turnToRight();
-
+        } catch (Exception e) {    }
     }
 
     private static int[] scan() {
@@ -220,6 +232,10 @@ public class PathFinder
 
 
     private static void turnToLeft() {
+        if (!active) {
+            waiting();
+            return;
+        }
 
         robotControl.setSteering(100);
         hang(100);
@@ -230,57 +246,57 @@ public class PathFinder
         hang(500);
         robotControl.setMotorSpeed(0);
         robotControl.setSteering(0);
-
-
-
-
         hang(1000);
-
         driveWhileMeasuring();
 
     }
 
     private static void turnToRight() {
+        if (!active) {
+            waiting();
+            return;
+        }
 
-        robotControl.setSteering(-100);
-        hang(100);
-        drive(1);
+            robotControl.setSteering(-100);
+            hang(100);
+            drive(1);
 
-        hang(200);
-        drive(1);
-        hang(500);
-        robotControl.setMotorSpeed(0);
-        robotControl.setSteering(0);
+            hang(200);
+            drive(1);
+            hang(500);
+            robotControl.setMotorSpeed(0);
+            robotControl.setSteering(0);
 
-        hang(1000);
-
-        driveWhileMeasuring();
+            hang(1000);
+            driveWhileMeasuring();
 
     }
 
     private static void driveWhileMeasuring() {
+        if (!active) {
+            waiting();
+            return;
+        }
+            System.out.println("Driving forward while measuring ");
+            boolean running = true;
 
-        System.out.println("Driving forward while measuring ");
-        boolean running = true;
+            drive(1);
+            robotControl.setSteering(0);
 
-        drive(1);
-        robotControl.setSteering(0);
+            while (running) {
 
-        while (running) {
+                int forwardDistance = Math.round(distanceMonitor.getDistance());
+                if (forwardDistance < 50) {
+                    // Stop
+                    System.out.println("Obstacle in path");
+                    running = false;
+                    stop();
+                }
 
-            int forwardDistance = Math.round(distanceMonitor.getDistance());
-            if (forwardDistance < 50 ) {
-                // Stop
-                System.out.println("Obstacle in path");
-                running = false;
-                stop();
+                hang(100);
             }
 
-            hang(100);
-        }
-
-        scanSuroundingsBeforeMoving();
-
+            scanSuroundingsBeforeMoving();
     }
 
     private static void drive(int direction) {
@@ -298,82 +314,67 @@ public class PathFinder
 
 
     private static void threePointTurn() {
+        if (!active) {
+            waiting();
+            return;
+        }
+            System.out.println("Three point Turn");
+            robotControl.setMotorSpeed(0);
+            hang(50);
+            robotControl.setSteering(-100);
+            drive(-1);
+            hang(1000);
+            robotControl.setMotorSpeed(0);
+            robotControl.setSteering(100);
+            hang(800);
+            robotControl.setSteering(100);
+            drive(1);
+            hang(1000);
+            robotControl.setSteering(0);
+            robotControl.setMotorSpeed(0);
 
-        System.out.println("Three point Turn");
-        robotControl.setMotorSpeed(0);
-        hang(50);
-        robotControl.setSteering(-100);
-        drive(-1);
-        hang(1000);
-        robotControl.setMotorSpeed(0);
-        robotControl.setSteering(100);
-        hang(800);
-        robotControl.setSteering(100);
-        drive(-1);
-        hang(1000);
-        robotControl.setSteering(0);
-        robotControl.setMotorSpeed(0);
+            hang(1000);
 
-        hang(1000);
-
-        scanSuroundingsBeforeMoving();
+            scanSuroundingsBeforeMoving();
     }
 
 
     private static void reverseTurn() {
-
-
-        robotControl.increaseHeadlights();
-
-        robotControl.setMotorSpeed(0);
+        if (active) {
+            robotControl.increaseHeadlights();
+            robotControl.setMotorSpeed(0);
             hang(50);
-        drive(-1);
+            drive(-1);
             hang(800);
 
-        robotControl.setSteering(-100);
-        drive(-1);
+            robotControl.setSteering(-100);
+            drive(-1);
             hang(800);
-        robotControl.setMotorSpeed(0);
+            robotControl.setMotorSpeed(0);
             hang(50);
-        robotControl.setSteering(100);
-        drive(-1);
+            robotControl.setSteering(100);
+            drive(-1);
             hang(500);
-        robotControl.setSteering(0);
-        robotControl.setMotorSpeed(0);
-
-
-        
-        robotControl.decreaseHeadlights();
-
-
-
-
-        
+            robotControl.setSteering(0);
+            robotControl.setMotorSpeed(0);
+            robotControl.decreaseHeadlights();
+        }
     }
 
 
     private static void shakeHead() {
 
-
-        robotControl.setMastPan(50);
-        hang(1000);
-        robotControl.setMastPan(20);
-        hang(100);
-
-        robotControl.setMastPan(80);
-        hang(100);
-
-        robotControl.setMastPan(20);
-        hang(100);
-
-        robotControl.setMastPan(80);
-        hang(100);
-
-
-        robotControl.setMastPan(50);
-
-
-
+            robotControl.setMastPan(50);
+            hang(1000);
+            robotControl.setMastPan(20);
+            hang(100);
+            robotControl.setMastPan(80);
+            hang(100);
+            robotControl.setMastPan(20);
+            hang(100);
+            robotControl.setMastPan(80);
+            hang(100);
+            robotControl.setMastPan(50);
 
     }
     

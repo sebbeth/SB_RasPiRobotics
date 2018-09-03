@@ -21,7 +21,7 @@ public class AutoSenseWalls1
         robotControl = new RobotControlManager();
         distanceMonitor = new UltraSoundDistanceMonitor();
         
-        new RunnablePushButtonMonitor().start();
+        //new RunnablePushButtonMonitor().start();
     
         
         //activate();
