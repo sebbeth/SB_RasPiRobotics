@@ -11,57 +11,37 @@ public class PWMServoController {
     private int maxValue;
     private int offset;
 
-
     private int value;
-
     private int softPWMPinNumber;
 
 
     public PWMServoController(int pinNumber, int startingPosition, int minValueInput, int maxValueInput, int offsetInput) {
 
-
         // initialize wiringPi library
         com.pi4j.wiringpi.Gpio.wiringPiSetup();
-
         softPWMPinNumber = pinNumber;
-
+        minValue = minValueInput;
+        maxValue = maxValueInput;
+        offset = offsetInput;
         // create soft-pwm pins (min=0 ; max=100)
         SoftPwm.softPwmCreate(softPWMPinNumber, 0, 100);
-
         setPosition(startingPosition);
-
     }
 
     public void setPosition(int input) {
 
-
-
-
         input = (int)(input / 4.2);
 
-
         if (input != value ) {
-
             value = input;
             setPWM(value);
-
-
         }
-
-
-
-
     }
 
     private void setPWM(int input) {
-
-
-        SoftPwm.softPwmWrite(softPWMPinNumber, input);
-
-
+    //    if ( (input < maxValue ) && ( minValue < input) ) {
+            SoftPwm.softPwmWrite(softPWMPinNumber, input);
+      //  }
     }
-
-
-
 
 }

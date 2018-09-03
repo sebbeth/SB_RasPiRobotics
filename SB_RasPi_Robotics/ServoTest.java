@@ -18,7 +18,7 @@ public class ServoTest {
 
         System.out.println("Start");
 
-        steeringServo = new PWMServoController(6,0,0,180,0);
+        steeringServo = new PWMServoController(6,0,0,70,0);
         mastServo = new PWMServoController(3,0,0,180,0);
 
         while (true) {
@@ -26,7 +26,7 @@ public class ServoTest {
             tick();
 
             try {
-                Thread.sleep(200);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -44,10 +44,10 @@ public class ServoTest {
             direction = 1;
         }
 
-        position = position + 1 * direction;
+        position = position + 2 * direction;
 
-        steeringServo.setPosition(-position);
-        mastServo.setPosition(position);
+       // steeringServo.setPosition(position);
+        mastServo.setPosition(-position);
         System.out.println("Mast: " + position);
 
     }
