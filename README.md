@@ -19,10 +19,10 @@ run ```sudo javac -classpath .:classes:/opt/pi4j/lib/'*' -d ./build SB_RasPi_Rob
 
 
 # To run:
-```sudo java -classpath .:classes:/opt/pi4j/lib/'*' SB_RasPi_Robotics.<name of main class>
+```sudo java -classpath .:classes:/opt/pi4j/lib/'*' SB_RasPi_Robotics.<name of main class>```
 
 e.g.
-sudo java -classpath .:classes:/opt/pi4j/lib/'*' SB_RasPi_Robotics.PathFinder```
+```sudo java -classpath .:classes:/opt/pi4j/lib/'*' SB_RasPi_Robotics.PathFinder```
 
 
 

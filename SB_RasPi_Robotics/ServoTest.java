@@ -7,7 +7,7 @@ import SB_RasPi_Robotics.CodeBase.ServoController;
 public class ServoTest {
 
 
-    private static ServoController steeringServo;
+    private static PWMServoController steeringServo;
     private static int steeringServoValue = 0;
     private static PWMServoController mastServo;
     private static int position = 0;
@@ -18,7 +18,7 @@ public class ServoTest {
 
         System.out.println("Start");
 
-        steeringServo = new ServoController(22,0,90,140,115);
+        steeringServo = new PWMServoController(6,0,0,180,0);
         mastServo = new PWMServoController(3,0,0,180,0);
 
         while (true) {

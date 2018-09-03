@@ -10,9 +10,11 @@ public class PathFinder
     static UltraSoundDistanceMonitor distanceMonitor;
     static private boolean hitWall;
     static private boolean active = false;
+    final static int driveSpeed = 12;
+    final static int burstSpeed = 30;
 
-    
-	
+
+
     public static void main(String[] args) {
         
         System.out.println("********* PATHFINDER *********");
@@ -40,49 +42,24 @@ public class PathFinder
         int position = 0;
 
         while (panning) {
-
-
             robotControl.setMastPan(position);
-
             hang(20);
-
-
             position++;
-
             if (position == 100) {
-
                 panning = false;
-
             }
-
-
         }
 
         panning = true;
 
         while (panning) {
-
-
             robotControl.setMastPan(position);
-
             hang(20);
-
-
             position--;
-
             if (position == 50) {
-
                 panning = false;
-
             }
-
-
         }
-
-
-
-
-
     }
     
     
@@ -93,92 +70,50 @@ public class PathFinder
         try {
             
             active = true;
-
-            
             robotControl.increaseHeadlights();
             robotControl.increaseHeadlights();
+            robotControl.setSteering(100);
 
             Thread.sleep(300);
 
-            panMastServo();
-
+         //   panMastServo();
             robotControl.decreaseHeadlights();
             robotControl.decreaseHeadlights();
-
-            /*
-
-            robotControl.setMotorSpeed(0);
-            Thread.sleep(50);
-         
-            robotControl.setSteering(-100);
-            Thread.sleep(500);
-            robotControl.setSteering(100);
-            Thread.sleep(500);
             robotControl.setSteering(0);
-            Thread.sleep(50);
-
-            */
-
 
             scanSuroundingsBeforeMoving();
-
             
-        } catch (Exception e) {
-            
-        }
-        
-        
-        
-        
+        } catch (Exception e) {    }
     }
-
-
-
-
 
     
 
     public static void pushButtonPressed() {
-        
         System.out.println("Button!!");
-
-        
-    
     }
 
 
     private static void hang(int time) {
-
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
 
     private static int averageOf(int[] input) {
 
         int sum = 0;
-
         for (int i = 0; i < input.length; i++ ) {
-
-            // Sum the inputs
-            sum = sum + input[i];
-
+            sum = sum + input[i]; // Sum the inputs
         }
 
         // Now average the result
-
-
         return sum / input.length;
     }
 
-    /****  Skills    **/
-
-
-
+    /****  Skills  ****/
 
     private static void scanSuroundingsBeforeMoving() {
 
@@ -190,8 +125,6 @@ public class PathFinder
 
             if centre measurement == 0
                 three point turn
-
-
 
             if   averageOf([1] + [2] + [3] >= 100
                 Go forward
@@ -290,10 +223,10 @@ public class PathFinder
 
         robotControl.setSteering(100);
         hang(100);
-        robotControl.setMotorSpeed(20);
+        drive(1);
 
         hang(200);
-        robotControl.setMotorSpeed(30);
+        drive(1);
         hang(500);
         robotControl.setMotorSpeed(0);
         robotControl.setSteering(0);
@@ -311,16 +244,13 @@ public class PathFinder
 
         robotControl.setSteering(-100);
         hang(100);
-        robotControl.setMotorSpeed(20);
+        drive(1);
 
         hang(200);
-        robotControl.setMotorSpeed(30);
+        drive(1);
         hang(500);
         robotControl.setMotorSpeed(0);
         robotControl.setSteering(0);
-
-
-
 
         hang(1000);
 
@@ -331,23 +261,18 @@ public class PathFinder
     private static void driveWhileMeasuring() {
 
         System.out.println("Driving forward while measuring ");
-
         boolean running = true;
 
-        robotControl.setMotorSpeed(20);
+        drive(1);
         robotControl.setSteering(0);
-
 
         while (running) {
 
             int forwardDistance = Math.round(distanceMonitor.getDistance());
-
             if (forwardDistance < 50 ) {
-
                 // Stop
                 System.out.println("Obstacle in path");
                 running = false;
-
                 stop();
             }
 
@@ -358,33 +283,40 @@ public class PathFinder
 
     }
 
+    private static void drive(int direction) {
+
+        int modifier = -1;
+        if (direction == 1) { // forward
+            modifier = 1;
+        }
+        robotControl.setMotorSpeed(modifier * 30); // Go fast,
+        hang(200);
+        robotControl.setMotorSpeed(modifier * 20); // then slower,
+        hang(200);
+        robotControl.setMotorSpeed(modifier * driveSpeed); // Then proceed at crusing speed.
+    }
+
 
     private static void threePointTurn() {
 
         System.out.println("Three point Turn");
-
         robotControl.setMotorSpeed(0);
         hang(50);
-        robotControl.setMotorSpeed(-20);
         robotControl.setSteering(-100);
+        drive(-1);
         hang(1000);
         robotControl.setMotorSpeed(0);
         robotControl.setSteering(100);
         hang(800);
         robotControl.setSteering(100);
-        robotControl.setMotorSpeed(20);
+        drive(-1);
         hang(1000);
         robotControl.setSteering(0);
         robotControl.setMotorSpeed(0);
 
-
-
         hang(1000);
 
         scanSuroundingsBeforeMoving();
-
-
-
     }
 
 
@@ -395,16 +327,16 @@ public class PathFinder
 
         robotControl.setMotorSpeed(0);
             hang(50);
-        robotControl.setMotorSpeed(-20);
+        drive(-1);
             hang(800);
 
         robotControl.setSteering(-100);
-        robotControl.setMotorSpeed(-20);
+        drive(-1);
             hang(800);
         robotControl.setMotorSpeed(0);
             hang(50);
         robotControl.setSteering(100);
-        robotControl.setMotorSpeed(20);
+        drive(-1);
             hang(500);
         robotControl.setSteering(0);
         robotControl.setMotorSpeed(0);
